@@ -5,10 +5,13 @@ import requests
 import os
 from dotenv import load_dotenv
 
-# load environment variables
-load_dotenv()
+import streamlit as st
+TMDB_API_KEY = st.secrets["TMDB_API_KEY"]
 
-TMDB_API_KEY = os.getenv("TMDB_API_KEY")
+# # load environment variables
+# load_dotenv()
+
+# TMDB_API_KEY = os.getenv("TMDB_API_KEY")
 
 # load data
 movies = pickle.load(open('movies.pkl','rb'))
