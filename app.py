@@ -3,7 +3,7 @@ import pickle
 import pandas as pd
 import requests
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
 import streamlit as st
 TMDB_API_KEY = st.secrets["TMDB_API_KEY"]
