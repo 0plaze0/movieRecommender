@@ -15,22 +15,28 @@ movies = pickle.load(open('movies.pkl','rb'))
 similarity = pickle.load(open('similarity.pkl','rb'))
 
 # fetch poster
+@st.cache_data
 def fetch_poster(movie_id):
-    url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={TMDB_API_KEY}&language=en-US"
-    data = requests.get(url)
-    data = data.json()
-    
-    poster_path = data.get('poster_path')
+    try:
+        url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={TMDB_API_KEY}&language=en-US"
+        response = requests.get(url, timeout=5)
 
-    if poster_path:
-        return "https://image.tmdb.org/t/p/w500/" + poster_path
-    else:
-        return "https://via.placeholder.com/500x750?text=No+Image"
+        if response.status_code != 200:
+            return "https://via.placeholder.com/500x750"
 
+        data = response.json()
+        poster_path = data.get("poster_path")
 
+        if poster_path:
+            return "https://image.tmdb.org/t/p/w500/" + poster_path
+        else:
+            return "https://via.placeholder.com/500x750"
+
+    except requests.exceptions.RequestException:
+        return "https://via.placeholder.com/500x750"
 # recommendation function
 def recommend(movie):
-    movie_index = movies[movies['title'] == movie].index[0]
+    movie_index = movies[movies['original_title'] == movie].index[0]
     distances = similarity[movie_index]
 
     movie_list = sorted(
@@ -43,9 +49,9 @@ def recommend(movie):
     recommended_posters = []
 
     for i in movie_list:
-        movie_id = movies.iloc[i[0]].movie_id
+        movie_id = movies.iloc[i[0]].id
 
-        recommended_movies.append(movies.iloc[i[0]].title)
+        recommended_movies.append(movies.iloc[i[0]]['original_title'])
         recommended_posters.append(fetch_poster(movie_id))
 
     return recommended_movies, recommended_posters
@@ -56,7 +62,7 @@ st.title("Movie Recommender System")
 
 selected_movie = st.selectbox(
     "Select a movie",
-    movies['title'].values
+    movies['original_title'].values
 )
 
 if st.button("Recommend"):
